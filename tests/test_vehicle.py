@@ -7,7 +7,7 @@ Unit tests for the AutonomousVehicle class.
 import pytest
 import numpy as np
 from unittest.mock import Mock, patch
-from vehicle import AutonomousVehicle
+from src.vehicle import AutonomousVehicle
 
 class TestAutonomousVehicle:
     def setup_method(self):

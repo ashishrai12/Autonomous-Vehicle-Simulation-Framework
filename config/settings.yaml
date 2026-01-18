@@ -1,0 +1,22 @@
+simulation:
+  dt: 0.1
+  total_time: 10.0
+
+vehicle:
+  wheelbase: 2.5
+  width: 2.0
+  height: 1.5
+  initial_pose: [0.0, 0.0, 0.0]
+  max_speed: 20.0
+  max_acceleration: 5.0
+  max_steering_angle: 0.5  # radians
+
+sensors:
+  lidar:
+    num_rays: 32
+    max_range: 20.0
+    noise_std: 0.05
+
+environment:
+  friction: 0.8
+  gravity: 9.81

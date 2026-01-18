@@ -1,39 +1,109 @@
 # Autonomous Vehicle Simulation Framework
 
-This project provides a basic framework for simulating autonomous vehicles in Isaac Sim. It includes modules for vehicle control, environment setup, and various test scenarios including edge cases like low visibility, high traffic, and pedestrians.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Rust](https://img.shields.io/badge/Rust-Core-orange.svg)](https://www.rust-lang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
-## Features
+A production-grade, high-performance simulation engine for robotics and autonomous driving. This framework leverages a **Rust-powered physics engine** exposed via **PyO3** for maximum performance and portability.
 
-- Autonomous vehicle with navigation, obstacle avoidance, and path planning
-- Modular scenario system for testing
-- Edge case scenarios: low visibility, high traffic, pedestrians
-- Integration with Isaac Sim for realistic simulation
+## The Mission
+Transition from a Python-heavy prototype to a professional robotics platform prioritized for **Speed**, **Portability**, and **Scientific Clarity**.
 
-## Requirements
+---
 
-- Isaac Sim (NVIDIA Omniverse)
-- Python 3.7+
-- Required Python packages (see requirements.txt)
+## Architecture
 
-## Installation
+The lifecycle of a single simulation frame is optimized by offloading heavy spatial calculations to Rust.
 
-1. Install Isaac Sim from NVIDIA's website.
-2. Clone this repository.
-3. Install dependencies: `pip install -r requirements.txt`
+```mermaid
+sequenceDiagram
+    participant P as Python AI Controller
+    participant R as Rust Physics Engine
+    participant C as Collision Engine
+    participant S as Sensor Layer (Lidar)
 
-## Usage
+    loop Every Simulation Step
+        P->>R: Update Control (Accel, Steer)
+        R->>R: Integrate Kinematics (Bicycle Model)
+        R->>C: Check Spatial Intersections
+        C-->>R: Collision Result
+        R->>S: Cast Rays (Ray-casting)
+        S-->>R: Range Data
+        R-->>P: State Update & Sensor Feedback
+    end
+```
 
-Run the main simulation:
+---
+
+## Technical Specification: Vehicle Dynamics
+
+### Kinematic Bicycle Model
+The vehicle dynamics are modeled using a non-linear kinematic bicycle model, which provides a high fidelity representation of steering constraints while remaining computationally efficient.
+
+The state vector is defined as $s = [x, y, \psi, v]$, where:
+- $(x, y)$: Rear-axle position
+- $\psi$: Heading angle (yaw)
+- $v$: Longitudinal velocity
+
+The state transition equations implemented in Rust:
+- $\dot{x} = v \cos(\psi)$
+- $\dot{y} = v \sin(\psi)$
+- $\dot{\psi} = \frac{v}{L} \tan(\delta)$
+- $\dot{v} = a$
+
+Where:
+- $L$: Wheelbase length (configurable in `settings.yaml`)
+- $\delta$: Steering angle
+- $a$: Acceleration
+
+---
+
+## Performance Features
+- **Zero-Cost Abstractions**: Physics logic (ray-casting, collisions) implemented in Rust for $O(1)$ loop overhead.
+- **Portability**: Full Docker support with NVIDIA/CUDA GPU acceleration for perception layers.
+- **Configuration**: Decoupled parameters via `config/settings.yaml`.
+
+---
+
+## Installation & Usage
+
+### Local Development
+Requires Rust Toolchain and Python 3.10+.
 
 ```bash
-python main.py
+# Build the Rust engine
+make build
+
+# Run the simulation
+make run
 ```
+
+### Docker (Recommended)
+Build and run the entire stack with GUI support:
+
+```bash
+# Build container
+make docker-build
+
+# Run container (supports X11 forwarding)
+make docker-run
+```
+
+---
 
 ## Project Structure
 
-- `main.py`: Entry point for the simulation
-- `vehicle.py`: Autonomous vehicle implementation
-- `environment.py`: Simulation environment setup
-- `scenarios.py`: Test scenarios and edge cases
-- `tests/`: Unit tests
-- `requirements.txt`: Python dependencies
+```text
+/
+├── rust_engine/         # High-performance Rust core
+│   ├── src/
+│   │   ├── kinematics.rs # Bicycle model implementation
+│   │   ├── collision.rs  # AABB/OBB detection
+│   │   └── raycast.rs    # Efficient ray-casting for Lidar
+│   └── Cargo.toml
+├── src/                 # Python logic (Perception/Planning)
+├── config/              # YAML simulation parameters
+├── Dockerfile           # Multi-stage production build
+├── docker-compose.yml   # GUI & GPU orchestration
+└── Makefile             # Developer shortcuts
+```

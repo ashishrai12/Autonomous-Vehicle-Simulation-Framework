@@ -6,7 +6,7 @@ Unit tests for the ScenarioManager class.
 
 import pytest
 from unittest.mock import Mock, patch
-from scenarios import ScenarioManager
+from src.scenarios import ScenarioManager
 
 class TestScenarioManager:
     def setup_method(self):
