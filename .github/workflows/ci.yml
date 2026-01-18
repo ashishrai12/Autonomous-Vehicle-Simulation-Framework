@@ -32,8 +32,7 @@ jobs:
 
     - name: Build Rust Engine
       run: |
-        cd rust_engine
-        maturin develop
+        pip install ./rust_engine
 
     - name: Run Tests
       run: |
